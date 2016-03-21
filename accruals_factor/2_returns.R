@@ -1,6 +1,5 @@
 ## ---------------------------------------------
 #  Percent Operating Accruals + Generalized Accruals Indices 
-#  UCLA Anderson ASAM (Anderson Student Asset Management) 
 #  Author: Jonathan Liang (jonathan.liang.2016@anderson.ucla.edu)
 ## ---------------------------------------------
 
