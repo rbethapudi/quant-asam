@@ -153,7 +153,7 @@ returns_monthly_dt.to_csv(outputdir + "data-returns_monthly.csv")
 #
 #  RISK ANALYTICS
 #  Quantify beta / alpha under CAPM and FF-3 Models 
-#  
+#
 
 #  CAPM and FF-3 Model fits
 print("Fitting CAPM, FF-3 Models...")
@@ -180,10 +180,21 @@ sector_concentrations_dt = group_sector["market_value"].agg([np.mean, np.sum, le
 sector_concentrations_dt.rename(columns = {"mean": "avg_market_value", "sum": "total_market_value", "len": "count"}, inplace = True)
 sector_concentrations_dt.to_csv(outputdir + "data-sector_concentrations.csv")
 
-
 group_industry = portfolio_allocations_dt.groupby(["iyear", "gind"])
 industry_concentrations_dt = group_industry["market_value"].agg([np.mean, np.sum, len])
 industry_concentrations_dt.rename(columns = {"mean": "avg_market_value", "sum": "total_market_value", "len": "count"}, inplace = True)
 industry_concentrations_dt.to_csv(outputdir + "data-industry_concentrations.csv")
+
+#
+# Market Value Distributions
+# Using NYSE market cap deciles, we can see how the share targets are distributed
+#
+
+print("Market Value / Marketcap Concentrations (by year)..")
+group_iyear = portfolio_allocations_dt.groupby(["iyear"])
+iyear_stats_dt = group_iyear["market_value"].agg([np.mean, np.std, np.sum, len])
+iyear_stats_dt.rename(columns = {"mean": "marketcap_mean", "std": "marketcap_std", "sum": "marketcap_total"}, inplace = True)
+iyear_stats_dt.to_csv(outputdir + "data-iyear_marketcap_concentrations.csv")
+
 
 
