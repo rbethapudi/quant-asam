@@ -133,9 +133,9 @@ returns_monthly_dt.rename(columns = {"mean": "portfolio_return"}, inplace = True
 
 print("Loading Benchmarks (SP500, FF-3)...")
 sp500_returns_monthly_dt = pd.read_csv(inputdir + "sp500_returns.csv", header = 0)
-returns_monthly_dt = returns_monthly_dt.merge(sp500_returns_monthly_dt, on = ["month"], how = "inner")
-returns_monthly_dt.rename(columns = {"close": "sp500_close", "return": "sp500_return"}, inplace = True)
-returns_monthly_dt["excess_sp500_return"] = (returns_monthly_dt["portfolio_return"] - returns_monthly_dt["sp500_return"])
+returns_monthly_bm_dt = returns_monthly_dt.merge(sp500_returns_monthly_dt, on = ["month"], how = "inner")
+returns_monthly_bm_dt.rename(columns = {"close": "sp500_close", "return": "sp500_return"}, inplace = True)
+returns_monthly_bm_dt["excess_sp500_return"] = (returns_monthly_bm_dt["portfolio_return"] - returns_monthly_bm_dt["sp500_return"])
 
 #  Fama-French 3-Factor Model Data (from Ken French data library)
 ff3_dt = pd.read_csv(inputdir + "ff3_research_data_factors.csv", header = 0)
@@ -146,9 +146,29 @@ ff3_dt["SMB"] = ff3_dt["SMB"] / 100.0
 ff3_dt["HML"] = ff3_dt["HML"] / 100.0
 ff3_dt["RF"]  = ff3_dt["RF"] / 100.0
 
-returns_monthly_dt = returns_monthly_dt.merge(ff3_dt, on = ["month"], how = "inner")
-returns_monthly_dt["excess_rf_return"] = (returns_monthly_dt["portfolio_return"] - returns_monthly_dt["RF"])
-returns_monthly_dt.to_csv(outputdir + "data-returns_monthly.csv")
+returns_monthly_bm_dt = returns_monthly_bm_dt.merge(ff3_dt, on = ["month"], how = "inner")
+returns_monthly_bm_dt["excess_rf_return"] = (returns_monthly_bm_dt["portfolio_return"] - returns_monthly_bm_dt["RF"])
+returns_monthly_bm_dt.to_csv(outputdir + "data-returns_monthly.csv")
+
+#
+#  Annual Returns
+#  (+ also relatively to benchmark)
+#
+
+#  Prep data for calculations (1 + ret.monthly)
+print("Aggregating Annual Returns...")
+returns_monthly_bm_dt["portfolio_return_p1"] = (returns_monthly_bm_dt["portfolio_return"] + 1.0)
+returns_monthly_bm_dt["excess_sp500_return_p1"]  = (returns_monthly_bm_dt["excess_sp500_return"] + 1.0)
+returns_monthly_bm_dt["sp500_return_p1"] = (returns_monthly_bm_dt["sp500_return"] + 1.0)
+returns_monthly_bm_dt["iyear"] = returns_monthly_bm_dt.apply(lambda row: int(row["month"] / 100), axis = 1)
+
+# Aggregate calcs
+group_annual = returns_monthly_bm_dt.groupby(["iyear"])
+returns_annual_bm_dt = group_annual.agg({"portfolio_return_p1": "prod", "excess_sp500_return_p1": "prod", "sp500_return_p1": "prod"})
+returns_annual_bm_dt["portfolio_return"] = (returns_annual_bm_dt["portfolio_return_p1"] - 1.0)
+returns_annual_bm_dt["excess_sp500_return"] = (returns_annual_bm_dt["excess_sp500_return_p1"] - 1.0)
+returns_annual_bm_dt["sp500_return"] = (returns_annual_bm_dt["sp500_return_p1"] - 1.0)
+returns_annual_bm_dt.to_csv(outputdir + "data-returns_annual.csv")
 
 #
 #  RISK ANALYTICS
@@ -157,8 +177,8 @@ returns_monthly_dt.to_csv(outputdir + "data-returns_monthly.csv")
 
 #  CAPM and FF-3 Model fits
 print("Fitting CAPM, FF-3 Models...")
-capm_fit = sm.ols(formula = "excess_rf_return ~ Mkt_RF", data = returns_monthly_dt).fit()
-ff3_fit  = sm.ols(formula = "excess_rf_return ~ Mkt_RF + SMB + HML", data = returns_monthly_dt).fit()
+capm_fit = sm.ols(formula = "excess_rf_return ~ Mkt_RF", data = returns_monthly_bm_dt).fit()
+ff3_fit  = sm.ols(formula = "excess_rf_return ~ Mkt_RF + SMB + HML", data = returns_monthly_bm_dt).fit()
 capm_fit.summary()
 ff3_fit.summary()
 
