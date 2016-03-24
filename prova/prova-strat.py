@@ -21,7 +21,7 @@ import statsmodels.formula.api as sm
 basedir   = "/Users/liangjh/Workspace/quant-asam/prova/"
 inputdir  = basedir + "input/"
 outputdir = basedir + "output/" 
-
+allocation_buckets = 5
 
 #  READ FUNDAMENTALS DATA
 print("Reading Fundamentals Data...")
@@ -66,12 +66,12 @@ for year in fundamentals_dt["fyear"].unique():
     before_cardinality = curr_dt.shape[0]
 
     #  ROIC (profitability) ranking: select quantile 5 (top quantile)
-    quantile_roic = pd.qcut(curr_dt["roic"], 5, labels = list(range(1,6)))
+    quantile_roic = pd.qcut(curr_dt["roic"], allocation_buckets, labels = list(range(1, allocation_buckets + 1)))
     curr_dt["quantile_roic"] = quantile_roic
-    curr_dt = curr_dt.loc[curr_dt["quantile_roic"] == 5]
+    curr_dt = curr_dt.loc[curr_dt["quantile_roic"] == allocation_buckets]
 
     #  EV/EBITDA (valuation) ranking: select quantile 1 (lowest quantile), within ROIC quantile 5
-    quantile_ev_ebitda = pd.qcut(curr_dt["ev_ebitda"], 5, labels = list(range(1,6)))
+    quantile_ev_ebitda = pd.qcut(curr_dt["ev_ebitda"], allocation_buckets, labels = list(range(1, allocation_buckets + 1)))
     curr_dt["quantile_ev_ebitda"] = quantile_ev_ebitda
     curr_dt = curr_dt.loc[curr_dt["quantile_ev_ebitda"] == 1]
 
