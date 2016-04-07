@@ -10,7 +10,7 @@ require(hash)
 require(reshape2)
 
 #  Some global vars to control I/O
-base.dir        <- "/Users/liangjh/Workspaces/accruals_factor/"
+base.dir        <- "/Users/liangjh/Workspace/quant-asam/accruals_factor/"
 base.dir.input  <- paste0(base.dir, "input/")
 base.dir.output <- paste0(base.dir, "output/")
 base.dir.debug  <- paste0(base.dir, "output/")
@@ -41,7 +41,7 @@ ust.1yr.annual.dt <- fread(paste0(base.dir.input, "input_1yr_treasury_annual.csv
 ust.1yr.annual.dt[, iyear := as.integer(date/10000)]
 
 #  -- Fama-French Factors (monthly) --
-ff.benchmarks.dt <- fread(paste0(base.dir.input, "F-F_Research_Data_Factors_Monthly.csv"))
+ff.benchmarks.dt <- fread(paste0(base.dir.input, "F-F_Research_Data_Factors.csv"))
 ff.benchmarks.dt[, `:=`(excess_return_mkt = excess_return_mkt / 100.0, smb = smb / 100.0, hml = hml / 100.0, rf = rf / 100.0)]   #  normalize to 0..1 scale
 
 #

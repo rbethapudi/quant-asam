@@ -10,7 +10,7 @@ require(hash)
 require(reshape2)
 
 #  Some global vars to control I/O
-base.dir        <- "/Users/liangjh/Workspaces/accruals_factor/"
+base.dir        <- "/Users/liangjh/Workspace/quant-asam/accruals_factor/"
 base.dir.input  <- paste0(base.dir, "input/")
 base.dir.output <- paste0(base.dir, "output/")
 base.dir.debug  <- paste0(base.dir, "output/")
